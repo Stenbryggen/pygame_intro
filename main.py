@@ -3,6 +3,16 @@ from sys import exit
 
 from pygame import display
 
+def create_score(time):
+    test_font = pygame.font.Font('font/Pixeltype.ttf', 50)
+    score_surface = test_font.render(time, False, TEXT_COLOR)
+    score_rect = score_surface.get_rect(center = (SCREEN_WITDH/2, 50))
+    screen.blit(score_surface, score_rect)
+
+def display_score():
+    current_time = int((pygame.time.get_ticks() - start_time) / 1000)
+    create_score(f'Score: {current_time}')
+
 SCREEN_WITDH = 800
 SCREEN_HEIGHT = 400
 GROUND_HEIGHT = 300
@@ -16,14 +26,11 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WITDH, SCREEN_HEIGHT))
 pygame.display.set_caption('Runner')
 clock = pygame.time.Clock()
-test_font = pygame.font.Font('font/Pixeltype.ttf', 50)
 game_active = True
+start_time = 0
 
 sky_surface = pygame.image.load('graphics/Sky.png').convert()
 ground_surface = pygame.image.load('graphics/ground.png').convert()
-
-text_surface = test_font.render('Runner', False, TEXT_COLOR)
-text_rect = text_surface.get_rect(center = (SCREEN_WITDH/2,50))
 
 snail_surface = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
 snail_ract = snail_surface.get_rect(bottomleft = (SCREEN_WITDH, GROUND_HEIGHT))
@@ -47,14 +54,18 @@ while True:
                 else:
                     game_active = True
                     snail_ract.left = SCREEN_WITDH
+                    start_time = pygame.time.get_ticks()
+            
+            if event.key == pygame.K_q:
+                pygame.quit()
+                exit()
+
     
  
     if game_active:
         screen.blit(sky_surface, (0,0))
         screen.blit(ground_surface, (0,GROUND_HEIGHT))
-        pygame.draw.rect(screen, BOX_COLOR, text_rect)
-        pygame.draw.rect(screen, BOX_COLOR, text_rect, 10)
-        screen.blit(text_surface, text_rect)
+        display_score()
 
         snail_ract.x -= SNAIL_SPEED
         if snail_ract.right <= 0: snail_ract.left = SCREEN_WITDH
@@ -70,7 +81,6 @@ while True:
             game_active = False
     else:
         screen.fill('Yellow')
-
 
     pygame.display.update()
     clock.tick(60)
