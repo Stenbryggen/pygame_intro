@@ -21,12 +21,13 @@ BOX_COLOR = '#c0e8ec'
 JUMP_HEIGHT = -20
 GRAVITY = 1
 SNAIL_SPEED = 5
+SCREEN_COLOR = (94, 129, 162)
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WITDH, SCREEN_HEIGHT))
 pygame.display.set_caption('Runner')
 clock = pygame.time.Clock()
-game_active = True
+game_active = False
 start_time = 0
 
 sky_surface = pygame.image.load('graphics/Sky.png').convert()
@@ -38,6 +39,14 @@ snail_ract = snail_surface.get_rect(bottomleft = (SCREEN_WITDH, GROUND_HEIGHT))
 player_surface = pygame.image.load('graphics/Player/player_walk_1.png').convert_alpha()
 player_ract = player_surface.get_rect(midbottom = (80, GROUND_HEIGHT))
 player_gravity = 0
+
+player_stand = pygame.image.load('graphics/Player/player_stand.png').convert_alpha()
+player_stand = pygame.transform.rotozoom(player_stand, 0, 2)
+player_stand_rect = player_stand.get_rect(center = (400, 200))
+
+test_font = pygame.font.Font('font/Pixeltype.ttf', 50)
+game_name = test_font.render('Pixel Runner',False, (111, 196,169))
+game_name_rect = game_name.get_rect(center = (400, 80))
 
 while True:
     for event in pygame.event.get():
@@ -65,7 +74,6 @@ while True:
     if game_active:
         screen.blit(sky_surface, (0,0))
         screen.blit(ground_surface, (0,GROUND_HEIGHT))
-        display_score()
 
         snail_ract.x -= SNAIL_SPEED
         if snail_ract.right <= 0: snail_ract.left = SCREEN_WITDH
@@ -79,8 +87,12 @@ while True:
 
         if snail_ract.colliderect(player_ract):
             game_active = False
+
+        display_score()
     else:
-        screen.fill('Yellow')
+        screen.fill((94, 129, 162))
+        screen.blit(player_stand,player_stand_rect)
+        screen.blit(game_name, game_name_rect)
 
     pygame.display.update()
     clock.tick(60)
