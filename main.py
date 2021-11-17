@@ -39,6 +39,17 @@ def collisions(player, obstacles):
                 return False
     return True
 
+def player_animation():
+    global player_surface, player_index
+
+    if player_ract.bottom < 300:
+        player_surface = player_jump
+    else:
+        player_index += 0.1
+        if player_index >= len(player_walk):
+            player_index = 0
+        player_surface = player_walk[int(player_index)]
+
 SCREEN_WITDH = 800
 SCREEN_HEIGHT = 400
 GROUND_HEIGHT = 300
@@ -62,11 +73,27 @@ sky_surface = pygame.image.load('graphics/Sky.png').convert()
 ground_surface = pygame.image.load('graphics/ground.png').convert()
 
 # Obstacles
-snail_surface = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
-fly_surface = pygame.image.load('graphics/Fly/Fly1.png').convert_alpha()
+snail_frame1 = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
+snail_frame2 = pygame.image.load('graphics/snail/snail2.png').convert_alpha()
+snail_frames = [snail_frame1, snail_frame2]
+snail_index = 0
+snail_surface = snail_frames[snail_index]
+
+fly_frame1 = pygame.image.load('graphics/Fly/Fly1.png').convert_alpha()
+fly_frame2 = pygame.image.load('graphics/Fly/Fly2.png').convert_alpha()
+fly_frames = [fly_frame1, fly_frame2]
+fly_index = 0
+fly_surface = fly_frames[fly_index]
+
 obstacle_rect_list = []
 
-player_surface = pygame.image.load('graphics/Player/player_walk_1.png').convert_alpha()
+player_walk1 = pygame.image.load('graphics/Player/player_walk_1.png').convert_alpha()
+player_walk2 = pygame.image.load('graphics/Player/player_walk_2.png').convert_alpha()
+player_walk = [player_walk1, player_walk2]
+player_index = 0
+player_jump = pygame.image.load('graphics/Player/jump.png').convert_alpha()
+
+player_surface = player_walk[player_index]
 player_ract = player_surface.get_rect(midbottom = (80, GROUND_HEIGHT))
 player_gravity = 0
 
@@ -84,6 +111,12 @@ game_message_rect = game_message.get_rect(center = (400, 320))
 # Timer
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 1500)
+
+snail_animation_timer = pygame.USEREVENT +2
+pygame.time.set_timer(snail_animation_timer, 500)
+
+fly_animation_timer = pygame.USEREVENT +3
+pygame.time.set_timer(fly_animation_timer, 200)
 
 while True:
     for event in pygame.event.get():
@@ -105,12 +138,25 @@ while True:
                 pygame.quit()
                 exit()
         
-        if event.type == obstacle_timer and game_active:
-            if randint(0,2):
-                obstacle_rect_list.append(snail_surface.get_rect(bottomleft = (randint(900, 1100), GROUND_HEIGHT)))
-            else:
-                obstacle_rect_list.append(fly_surface.get_rect(bottomleft = (randint(900, 1100), GROUND_HEIGHT -90)))
+        if game_active:
+            if event.type == obstacle_timer:
+                if randint(0,2):
+                    obstacle_rect_list.append(snail_surface.get_rect(bottomleft = (randint(900, 1100), GROUND_HEIGHT)))
+                else:
+                    obstacle_rect_list.append(fly_surface.get_rect(bottomleft = (randint(900, 1100), GROUND_HEIGHT -90)))
         
+            if snail_index == 0:
+                snail_index = 1
+            else:
+                snail_index = 0
+            snail_surface = snail_frames[snail_index]
+
+            if fly_index == 0:
+                fly_index = 1
+            else:
+                fly_index = 0
+            fly_surface = fly_frames[fly_index]
+
     if game_active:
         screen.blit(sky_surface, (0,0))
         screen.blit(ground_surface, (0,GROUND_HEIGHT))
@@ -121,16 +167,15 @@ while True:
 
         player_gravity += GRAVITY
         player_ract.y += player_gravity
-        if player_ract.bottom >= 300: player_ract.bottom = GROUND_HEIGHT
-
+        if player_ract.bottom >= 300: 
+            player_ract.bottom = GROUND_HEIGHT
+        player_animation()
         screen.blit(player_surface, player_ract)
 
         # Obstacle movment
         obstacle_rect_list = obstacle_movement(obstacle_rect_list)
 
         game_active = collisions(player_ract, obstacle_rect_list)
-        # if snail_ract.colliderect(player_ract):
-        #     game_active = False
 
         display_score()
         score = display_score()
