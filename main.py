@@ -19,10 +19,14 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midbottom = (80, 300))
         self.gravity = 0
 
+        self.jump_sound = pygame.mixer.Sound('audio/jump.mp3')
+        self.jump_sound.set_volume(0.5)
+
     def player_input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.rect.bottom >= 300:
             self.gravity = -20
+            self.jump_sound.play()
 
     def apply_gravity(self):
         self.gravity += 1
@@ -107,6 +111,7 @@ SNAIL_SPEED = 5
 SCREEN_COLOR = (94, 129, 162)
 SPLASH_TEXT_COLOR = (111, 196,169)
 
+
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WITDH, SCREEN_HEIGHT))
 pygame.display.set_caption('Runner')
@@ -114,6 +119,7 @@ clock = pygame.time.Clock()
 game_active = False
 start_time = 0
 score = 0
+game_music = pygame.mixer.Sound('audio/music.wav')
 
 player = pygame.sprite.GroupSingle()
 player.add(Player())
@@ -159,6 +165,7 @@ while True:
                 obstacle_group.add(Obstacle(choices(['fly', 'snail', 'snail', 'snail'])))
 
     if game_active:
+        game_music.play(loops = -1)
         screen.blit(sky_surface, (0,0))
         screen.blit(ground_surface, (0,GROUND_HEIGHT))
 
@@ -173,6 +180,7 @@ while True:
         display_score()
         score = display_score()
     else:
+        game_music.stop()
         screen.fill((94, 129, 162))
         screen.blit(game_name, game_name_rect)
         screen.blit(player_stand,player_stand_rect)
